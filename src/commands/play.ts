@@ -82,16 +82,16 @@ export default {
 				applyVolumeAsFilter: true // if true player.setVolume(54) -> player.filters.setVolume(0.54)
 			})
 
-		await player.setSponsorBlock([
-			'sponsor',
-			'selfpromo',
-			'interaction',
-			'intro',
-			'outro',
-			'preview',
-			'music_offtopic',
-			'filler'
-		])
+		// await player.setSponsorBlock([
+		// 	'sponsor',
+		// 	'selfpromo',
+		// 	'interaction',
+		// 	'intro',
+		// 	'outro',
+		// 	'preview',
+		// 	'music_offtopic',
+		// 	'filler'
+		// ])
 
 		const connected = player.connected
 
@@ -176,7 +176,7 @@ export default {
 
 		const res = (await player.search(
 			{
-				query: focussedQuery,
+				query: focussedQuery ? focussedQuery:'เพลง',
 				source: interaction.options.getString(
 					'source'
 				) as SearchPlatform
