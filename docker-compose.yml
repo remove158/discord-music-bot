@@ -12,7 +12,7 @@ services:
         environment:
             - LAVALINK_NODES=lavalink://1:password@player:2333
     player:
-        image: ghcr.io/lavalink-devs/lavalink:4.0.5
+        image: ghcr.io/lavalink-devs/lavalink:4.0.8
         container_name: player
         restart: unless-stopped
         volumes:
