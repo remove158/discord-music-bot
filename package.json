@@ -1,26 +1,11 @@
 {
-  "name": "osmbot",
-  "module": "src/index.ts",
+  "name": "discord-music-bot",
+  "module": "index.ts",
   "type": "module",
-  "scripts": {
-    "dev": "tsx watch src/index.ts",
-    "start": "tsx src/index.ts"
-  },
   "devDependencies": {
-    "@types/bun": "latest",
-    "prettier": "^3.2.5",
-    "tsx": "^4.7.1"
+    "@types/bun": "latest"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
-  },
-  "dependencies": {
-    "@discordjs/builders": "^1.8.2",
-    "discord.js": "^14.14.1",
-    "dotenv": "^16.4.5",
-    "eslint": "^8.57.0",
-    "lavalink-client": "^2.3.6",
-    "znv": "^0.4.0",
-    "zod": "^3.22.4"
   }
 }
