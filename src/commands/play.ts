@@ -1,13 +1,12 @@
-import { randomUUIDv7 } from "bun";
 import {
   ApplicationCommandOptionType,
   AutocompleteInteraction,
   CommandInteraction,
 } from "discord.js";
 import { Discord, Slash, SlashOption } from "discordx";
+import type { Track, UnresolvedTrack } from "lavalink-client";
 import { Bot } from "../core/discord";
 import { MessageHelper } from "../utils/message-embed";
-import type { Track, UnresolvedTrack } from "lavalink-client";
 
 @Discord()
 class Play {
@@ -55,6 +54,7 @@ class Play {
                 .slice(0, 25)
         );
       } else {
+        interaction.reply(String(message));
       }
     } catch (err) {
         await MessageHelper.handleError(
