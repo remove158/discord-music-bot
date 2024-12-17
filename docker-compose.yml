@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+    player:
+        image: ghcr.io/lavalink-devs/lavalink:4.0.8
+        container_name: player
+        restart: unless-stopped
+        volumes:
+            # Mount application.yml for configuration (optional, see Lavalink documentation)
+            - ./application.yml:/opt/Lavalink/application.yml
+        ports:
+            - 2333:2333
