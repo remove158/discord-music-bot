@@ -18,7 +18,7 @@ export class Main {
         GatewayIntentBits.MessageContent,
         GatewayIntentBits.GuildMessages,
       ],
-      silent: true,
+      silent: false,
     });
 
     this._client.once("ready", () => {
