@@ -1,5 +1,5 @@
 import { dirname, importx } from "@discordx/importer";
-import { GatewayIntentBits } from "discord.js";
+import { Events, GatewayIntentBits } from "discord.js";
 import { Client } from "discordx";
 import { envConfig } from "../env";
 import { LavaPlayerManager } from "./manager";
@@ -30,10 +30,11 @@ export class Bot {
 
     this._manager = new LavaPlayerManager(this._client);
 
-    this._client.on("interactionCreate", (interaction) => {
+    this._client.on(Events.InteractionCreate, (interaction) => {
       MessageHelper.listenOwner(interaction)
       this._client.executeInteraction(interaction);
     });
+
 
     await importx(`${dirname(import.meta.url)}/../commands/**/*.{js,ts}`);
 

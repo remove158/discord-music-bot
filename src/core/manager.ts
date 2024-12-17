@@ -1,12 +1,13 @@
 import { LavalinkManager, parseLavalinkConnUrl } from "lavalink-client";
 import { envConfig } from "../env";
-import type { Client } from "discordx";
-import type {
-  AutocompleteInteraction,
-  CommandInteraction,
-  GuildMember,
-  VoiceChannel,
+import {
+  Events,
+  type AutocompleteInteraction,
+  type CommandInteraction,
+  type GuildMember,
+  type VoiceChannel,
 } from "discord.js";
+import type { Client } from "discordx";
 
 const LavalinkNodesOfEnv = envConfig.LAVALINK_NODES.split(" ")
   .filter((v) => v.length)
@@ -35,22 +36,21 @@ export class LavaPlayerManager {
       },
     });
 
-    this.client.on("raw", (d) => {
+    this.client.on(Events.Raw, async (d) => {
       this.lavalink.sendRawData(d);
     });
 
-    this.client.once("ready", () => {
+    this.client.on(Events.ClientReady, async() => {
       void this.client.initApplicationCommands();
-      this.lavalink.init({
-        ...this.client.user!,
-        shards: "auto",
-      });
-      console.log(">> Bot is ready!");
+      this.lavalink.init({ 
+        id: envConfig.CLIENT_ID,
+        username: this.client.user?.username
+       }).then(
+        () => {
+          console.log(">> Bot is ready!");
+        }
+      ).catch(console.error); //VERY IMPORTANT!
     });
-  }
-
-  sendRaw(d: any) {
-    this.lavalink.sendRawData(d);
   }
 
   getPlayer(interaction: CommandInteraction | AutocompleteInteraction) {
