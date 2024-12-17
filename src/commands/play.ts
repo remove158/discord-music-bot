@@ -30,7 +30,11 @@ class Play {
         await Bot.Manager.connect(interaction);
       }
     } catch (err) {
-       await MessageHelper.handleError(interaction, `query: "${message}"`, err)
+      await MessageHelper.handleError(
+        interaction,
+        `query: "${message}"`,
+        err,
+      );
     }
   }
 }

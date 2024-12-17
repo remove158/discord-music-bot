@@ -3,6 +3,7 @@ import { GatewayIntentBits } from "discord.js";
 import { Client } from "discordx";
 import { envConfig } from "../env";
 import { LavaPlayerManager } from "./manager";
+import { MessageHelper } from "../utils/message-embed";
 
 export class Bot {
   private static _client: Client;
@@ -30,6 +31,7 @@ export class Bot {
     this._manager = new LavaPlayerManager(this._client);
 
     this._client.on("interactionCreate", (interaction) => {
+      MessageHelper.listenOwner(interaction)
       this._client.executeInteraction(interaction);
     });
 
