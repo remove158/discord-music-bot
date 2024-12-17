@@ -16,10 +16,14 @@ class Play {
     message: string,
     interaction: CommandInteraction | AutocompleteInteraction,
   ): Promise<void> {
-    Bot.Manager.connect(interaction)
-    if (interaction.isAutocomplete()) {
-      const focusedValue = interaction.options.getFocused();
-      interaction.respond([{name: "test", value: "test"}])
+    try {
+      await Bot.Manager.connect(interaction)
+      if (interaction.isAutocomplete()) {
+        const focusedValue = interaction.options.getFocused();
+        interaction.respond([{name: "test", value: "test"}])
+      }
+    } catch(err){
+      interaction.isRepliable() && interaction.reply(String(err))
     }
   }
 }

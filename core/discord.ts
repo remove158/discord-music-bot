@@ -36,6 +36,10 @@ export class Bot {
       console.log(">> Bot started");
     });
 
+    this._client.on("raw", (d) => {
+      this.Manager.sendRaw(d)
+    });
+
     this._client.on("interactionCreate", (interaction) => {
       this._client.executeInteraction(interaction);
     });

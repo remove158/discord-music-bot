@@ -36,7 +36,11 @@ export class LavaPlayerManager {
 		...this.client.user!,
 		shards: 'auto'
 	});
-	console.log("Lavalink manager initialized");
+	console.log(">> Lavalink manager initialized");
+  }
+
+  sendRaw(d: any) {
+    this.lavalink.sendRawData(d)
   }
 
   getPlayer(params: {
