@@ -43,7 +43,7 @@ export class MessageHelper {
 
   static handleError = async (
     interaction: CommandInteraction | AutocompleteInteraction,
-    content: any,
+    content: unknown,
     error: unknown,
   ) => {
     if (interaction.isRepliable()) {
@@ -59,7 +59,7 @@ export class MessageHelper {
 
   static sendErrorToOwner = async (
     interaction: CommandInteraction | AutocompleteInteraction,
-    content: any,
+    content: unknown,
     error: unknown,
   ) => {
     const embded = this.createEmbed("❌ something went wrong", [
