@@ -45,7 +45,7 @@ export class LavaPlayerManager {
         ...this.client.user!,
         shards: "auto",
       });
-      console.log(">> Bot is ready!")
+      console.log(">> Bot is ready!");
     });
   }
 
@@ -53,11 +53,8 @@ export class LavaPlayerManager {
     this.lavalink.sendRawData(d);
   }
 
-  getPlayer(params: {
-    guildId: string;
-    voiceChannel: string;
-    textChannelId: string;
-  }) {
+  getPlayer(interaction: CommandInteraction | AutocompleteInteraction) {
+    const params = this.getPlayerParams(interaction)
     const currentPlayer = this.lavalink.getPlayer(params.guildId);
     if (!currentPlayer)
       return this.lavalink.createPlayer({
@@ -73,20 +70,23 @@ export class LavaPlayerManager {
     return currentPlayer;
   }
 
-  async connect(interaction: CommandInteraction | AutocompleteInteraction) {
+  getPlayerParams(interaction: CommandInteraction | AutocompleteInteraction) {
     const vcId = (interaction.member as GuildMember)?.voice?.channelId;
     if (!vcId) throw new Error("You are not in a voice channel");
     const vc = (interaction.member as GuildMember)?.voice
       ?.channel as VoiceChannel;
     if (!vc.joinable || !vc.speakable)
       throw new Error("Unable to join your channel");
-
-    const player = this.getPlayer({
+    return {
       guildId: interaction.guildId ?? "",
       textChannelId: interaction.channelId ?? "",
       voiceChannel: vcId,
-    });
+    };
+  }
 
+  async connectPlayer(interaction: CommandInteraction | AutocompleteInteraction) {
+    const player = this.getPlayer(interaction);
     if (player.connected) await player.connect();
+    return player
   }
 }

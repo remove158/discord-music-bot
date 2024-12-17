@@ -7,6 +7,7 @@ import {
 import { Discord, Slash, SlashOption } from "discordx";
 import { Bot } from "../core/discord";
 import { MessageHelper } from "../utils/message-embed";
+import type { Track, UnresolvedTrack } from "lavalink-client";
 
 @Discord()
 class Play {
@@ -23,18 +24,44 @@ class Play {
     interaction: CommandInteraction | AutocompleteInteraction
   ): Promise<void> {
     try {
+      const player = await Bot.Manager.connectPlayer(interaction);
       if (interaction.isAutocomplete()) {
-        const focusedValue = interaction.options.getFocused();
-        interaction.respond([{ name: "test", value: "test" }]);
+        const searchResult = await player.search(
+          {
+            query: message,
+          },
+          interaction.user
+        );
+        if (!searchResult.tracks.length)
+          return await interaction.respond([
+            { name: `No Tracks found`, value: "nothing_found" },
+          ]);
+
+        await interaction.respond(
+          searchResult.loadType === "playlist"
+            ? [
+                {
+                  name: `Playlist [${searchResult.tracks.length} Tracks] - ${searchResult.playlist?.title}`,
+                  value: `autocomplete_0`,
+                },
+              ]
+            : searchResult.tracks
+                .map((t: Track | UnresolvedTrack, i) => ({
+                  name: `[${t.info.title} (by ${
+                    t.info.author || "Unknown-Author"
+                  })`.substring(0, 100),
+                  value: `autocomplete_${i}`,
+                }))
+                .slice(0, 25)
+        );
       } else {
-        await Bot.Manager.connect(interaction);
       }
     } catch (err) {
-      await MessageHelper.handleError(
-        interaction,
-        `query: "${message}"`,
-        err,
-      );
+        await MessageHelper.handleError(
+          interaction,
+          `query: "${message}"`,
+          err
+        );
     }
   }
 }

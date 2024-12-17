@@ -62,6 +62,7 @@ export class MessageHelper {
     content: unknown,
     error: unknown,
   ) => {
+    if(interaction.isAutocomplete()) return
     const embded = this.createEmbed("❌ something went wrong", [
       `> **TraceId:** \`${interaction.id}\``,
       `> **Command:** \`${interaction.commandName}\``,
