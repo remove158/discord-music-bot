@@ -1,6 +1,12 @@
-import { ApplicationCommandOptionType, CommandInteraction, AutocompleteInteraction } from "discord.js";
+import { randomUUIDv7 } from "bun";
+import {
+  ApplicationCommandOptionType,
+  AutocompleteInteraction,
+  CommandInteraction,
+} from "discord.js";
 import { Discord, Slash, SlashOption } from "discordx";
 import { Bot } from "../core/discord";
+import { MessageHelper } from "../utils/message-embed";
 
 @Discord()
 class Play {
@@ -14,16 +20,17 @@ class Play {
       autocomplete: true,
     })
     message: string,
-    interaction: CommandInteraction | AutocompleteInteraction,
+    interaction: CommandInteraction | AutocompleteInteraction
   ): Promise<void> {
     try {
-      await Bot.Manager.connect(interaction)
       if (interaction.isAutocomplete()) {
         const focusedValue = interaction.options.getFocused();
-        interaction.respond([{name: "test", value: "test"}])
+        interaction.respond([{ name: "test", value: "test" }]);
+      } else {
+        await Bot.Manager.connect(interaction);
       }
-    } catch(err){
-      interaction.isRepliable() && interaction.reply(String(err))
+    } catch (err) {
+       await MessageHelper.handleError(interaction, `query: "${message}"`, err)
     }
   }
 }

@@ -24,21 +24,10 @@ export class Bot {
         GatewayIntentBits.MessageContent,
         GatewayIntentBits.GuildMessages,
       ],
-      silent: false,
+      silent: true,
     });
 
     this._manager = new LavaPlayerManager(this._client);
-
-    this._client.once("ready", () => {
-      void this._client.initApplicationCommands();
-
-      this._manager.init();
-      console.log(">> Bot started");
-    });
-
-    this._client.on("raw", (d) => {
-      this.Manager.sendRaw(d)
-    });
 
     this._client.on("interactionCreate", (interaction) => {
       this._client.executeInteraction(interaction);

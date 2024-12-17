@@ -1,7 +1,12 @@
 import { LavalinkManager, parseLavalinkConnUrl } from "lavalink-client";
 import { envConfig } from "../env";
 import type { Client } from "discordx";
-import type { AutocompleteInteraction, CommandInteraction, GuildMember, VoiceChannel } from "discord.js";
+import type {
+  AutocompleteInteraction,
+  CommandInteraction,
+  GuildMember,
+  VoiceChannel,
+} from "discord.js";
 
 const LavalinkNodesOfEnv = envConfig.LAVALINK_NODES.split(" ")
   .filter((v) => v.length)
@@ -9,9 +14,9 @@ const LavalinkNodesOfEnv = envConfig.LAVALINK_NODES.split(" ")
 
 export class LavaPlayerManager {
   private lavalink: LavalinkManager;
-  private client: Client
+  private client: Client;
   constructor(client: Client) {
-	this.client = client
+    this.client = client;
     this.lavalink = new LavalinkManager({
       nodes: LavalinkNodesOfEnv,
       sendToShard: (guildId, payload) =>
@@ -29,18 +34,23 @@ export class LavaPlayerManager {
         },
       },
     });
-  }
 
-  init() {
-	this.lavalink.init({
-		...this.client.user!,
-		shards: 'auto'
-	});
-	console.log(">> Lavalink manager initialized");
+    this.client.on("raw", (d) => {
+      this.lavalink.sendRawData(d);
+    });
+
+    this.client.once("ready", () => {
+      void this.client.initApplicationCommands();
+      this.lavalink.init({
+        ...this.client.user!,
+        shards: "auto",
+      });
+      console.log(">> Bot is ready!")
+    });
   }
 
   sendRaw(d: any) {
-    this.lavalink.sendRawData(d)
+    this.lavalink.sendRawData(d);
   }
 
   getPlayer(params: {
@@ -63,7 +73,7 @@ export class LavaPlayerManager {
     return currentPlayer;
   }
 
-  async connect(interaction: CommandInteraction  | AutocompleteInteraction) {
+  async connect(interaction: CommandInteraction | AutocompleteInteraction) {
     const vcId = (interaction.member as GuildMember)?.voice?.channelId;
     if (!vcId) throw new Error("You are not in a voice channel");
     const vc = (interaction.member as GuildMember)?.voice
@@ -72,10 +82,10 @@ export class LavaPlayerManager {
       throw new Error("Unable to join your channel");
 
     const player = this.getPlayer({
-		guildId: interaction.guildId ?? '',
-		textChannelId: interaction.channelId ?? '',
-		voiceChannel: vcId,
-	});
+      guildId: interaction.guildId ?? "",
+      textChannelId: interaction.channelId ?? "",
+      voiceChannel: vcId,
+    });
 
     if (player.connected) await player.connect();
   }
