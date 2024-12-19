@@ -14,14 +14,14 @@ const LavalinkNodesOfEnv = envConfig.LAVALINK_NODES.split(" ")
   .map((url) => parseLavalinkConnUrl(url));
 
 export class LavaPlayerManager {
-  private lavalink: LavalinkManager;
-  private client: Client;
-  constructor(client: Client) {
-    this.client = client;
-    this.lavalink = new LavalinkManager({
+  private static _lavalink: LavalinkManager;
+  private static _client: Client;
+
+  static async initLavalink(client: Client) {
+    this._lavalink = new LavalinkManager({
       nodes: LavalinkNodesOfEnv,
       sendToShard: (guildId, payload) =>
-        this.client.guilds.cache.get(guildId)?.shard?.send(payload),
+        this._client.guilds.cache.get(guildId)?.shard?.send(payload),
       client: {
         id: envConfig.CLIENT_ID,
       },
@@ -35,29 +35,14 @@ export class LavaPlayerManager {
         },
       },
     });
-
-    this.client.on(Events.Raw, async (d) => {
-      this.lavalink.sendRawData(d);
-    });
-
-    this.client.on(Events.ClientReady, async() => {
-      void this.client.initApplicationCommands();
-      this.lavalink.init({ 
-        id: envConfig.CLIENT_ID,
-        username: this.client.user?.username
-       }).then(
-        () => {
-          console.log(">> Bot is ready!");
-        }
-      ).catch(console.error); //VERY IMPORTANT!
-    });
+    await this._lavalink.init({ ...client.user!, shards: 'auto' }) //VERY IMPORTANT!
   }
 
-  getPlayer(interaction: CommandInteraction | AutocompleteInteraction) {
+  static getPlayer(interaction: CommandInteraction | AutocompleteInteraction) {
     const params = this.getPlayerParams(interaction)
-    const currentPlayer = this.lavalink.getPlayer(params.guildId);
+    const currentPlayer = this._lavalink.getPlayer(params.guildId);
     if (!currentPlayer)
-      return this.lavalink.createPlayer({
+      return this._lavalink.createPlayer({
         guildId: params.guildId,
         voiceChannelId: params.voiceChannel,
         textChannelId: params.textChannelId,
@@ -70,7 +55,7 @@ export class LavaPlayerManager {
     return currentPlayer;
   }
 
-  getPlayerParams(interaction: CommandInteraction | AutocompleteInteraction) {
+  static getPlayerParams(interaction: CommandInteraction | AutocompleteInteraction) {
     const vcId = (interaction.member as GuildMember)?.voice?.channelId;
     if (!vcId) throw new Error("You are not in a voice channel");
     const vc = (interaction.member as GuildMember)?.voice
@@ -84,7 +69,7 @@ export class LavaPlayerManager {
     };
   }
 
-  async connectPlayer(interaction: CommandInteraction | AutocompleteInteraction) {
+  static async getConnectedPlayer(interaction: CommandInteraction | AutocompleteInteraction) {
     const player = this.getPlayer(interaction);
     if (player.connected) await player.connect();
     return player

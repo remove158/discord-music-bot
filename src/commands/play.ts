@@ -4,9 +4,10 @@ import {
   CommandInteraction,
 } from "discord.js";
 import { Discord, Slash, SlashOption } from "discordx";
-import type { Track, UnresolvedTrack } from "lavalink-client";
+import { type Track, type UnresolvedTrack } from "lavalink-client";
 import { Bot } from "../core/discord";
 import { MessageHelper } from "../utils/message-embed";
+import { LavaPlayerManager } from "../core/manager";
 
 @Discord()
 class Play {
@@ -23,7 +24,7 @@ class Play {
     interaction: CommandInteraction | AutocompleteInteraction
   ): Promise<void> {
     try {
-      const player = await Bot.Manager.connectPlayer(interaction);
+      const player = await LavaPlayerManager.getConnectedPlayer(interaction);
       if (interaction.isAutocomplete()) {
         const searchResult = await player.search(
           {
