@@ -35,7 +35,7 @@ export class LavaPlayerManager {
         },
       },
     });
-    await this._lavalink.init({ ...client.user!, shards: 'auto' }) //VERY IMPORTANT!
+    await this._lavalink.init({...client.user!}) //VERY IMPORTANT!
   }
 
   static getPlayer(interaction: CommandInteraction | AutocompleteInteraction) {
