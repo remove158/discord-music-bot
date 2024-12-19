@@ -42,14 +42,14 @@ export class MessageHelper {
   };
 
   static handleError = async (
-    interaction: CommandInteraction | AutocompleteInteraction,
+    interaction: Interaction<CacheType>,
     content: unknown,
     error: unknown,
   ) => {
     if (interaction.isRepliable()) {
       const embded = this.createEmbed("❌ something went wrong", [
         `> **TraceId:** \`${interaction.id}\``,
-        `> **Command:** \`${interaction.commandName}\``,
+        `> **Command:** \`${interaction.isCommand() ? interaction.commandName : '-'}\``,
         `> **Content:** \`${content}\``,
       ]);
       await this.replySilent(interaction, embded);
@@ -58,14 +58,14 @@ export class MessageHelper {
   };
 
   static sendErrorToOwner = async (
-    interaction: CommandInteraction | AutocompleteInteraction,
+    interaction: Interaction<CacheType>,
     content: unknown,
     error: unknown,
   ) => {
     if(interaction.isAutocomplete()) return
     const embded = this.createEmbed("❌ something went wrong", [
       `> **TraceId:** \`${interaction.id}\``,
-      `> **Command:** \`${interaction.commandName}\``,
+      `> **Command:** \`${interaction.isCommand() ? interaction.commandName : '-'}\``,
       `> **Content:** \`${content}\``,
       `> **Errorr:** \`${String(error)}\``,
       `> **Requestor:** \`${interaction.user.globalName} (${interaction.user.username})\``,

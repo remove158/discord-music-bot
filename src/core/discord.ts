@@ -24,9 +24,8 @@ export class Bot {
       silent: false,
     });
 
-    await importx(`${dirname(import.meta.url)}/../commands/**/*.{js,ts}`);
-    await importx(`${dirname(import.meta.url)}/../events/**/*.{js,ts}`);
-
+    
+    await importx(`${dirname(import.meta.url)}/../{commands,events}/**/*.{js,ts}`);
     await this._client.login(envConfig.DISCORD_TOKEN);
   }
 }

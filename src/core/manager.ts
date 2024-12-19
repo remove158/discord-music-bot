@@ -3,8 +3,10 @@ import { envConfig } from "../env";
 import {
   Events,
   type AutocompleteInteraction,
+  type CacheType,
   type CommandInteraction,
   type GuildMember,
+  type Interaction,
   type VoiceChannel,
 } from "discord.js";
 import type { Client } from "discordx";
@@ -16,8 +18,10 @@ const LavalinkNodesOfEnv = envConfig.LAVALINK_NODES.split(" ")
 export class LavaPlayerManager {
   private static _lavalink: LavalinkManager;
   private static _client: Client;
+  private static autocomplete = new Map()
 
   static async initLavalink(client: Client) {
+    this._client = client
     this._lavalink = new LavalinkManager({
       nodes: LavalinkNodesOfEnv,
       sendToShard: (guildId, payload) =>
@@ -35,27 +39,28 @@ export class LavaPlayerManager {
         },
       },
     });
-    await this._lavalink.init({...client.user!}) //VERY IMPORTANT!
+    await this._lavalink.init({...client.user!, shards: "auto"}) //VERY IMPORTANT!
+
+    this._client.on(Events.Raw, d => this._lavalink.sendRawData(d))
   }
 
-  static getPlayer(interaction: CommandInteraction | AutocompleteInteraction) {
+  static getPlayer(interaction: Interaction<CacheType>) {
     const params = this.getPlayerParams(interaction)
-    const currentPlayer = this._lavalink.getPlayer(params.guildId);
-    if (!currentPlayer)
-      return this._lavalink.createPlayer({
-        guildId: params.guildId,
-        voiceChannelId: params.voiceChannel,
-        textChannelId: params.textChannelId,
-        selfDeaf: true,
-        selfMute: false,
-        volume: 100, // default volume
-        instaUpdateFiltersFix: true, // optional
-        applyVolumeAsFilter: true, // if true player.setVolume(54) -> player.filters.setVolume(0.54)
-      });
-    return currentPlayer;
+  
+    return this._lavalink.getPlayer(params.guildId) ||
+			this._lavalink.createPlayer({
+				guildId: params.guildId,
+				voiceChannelId: params.voiceChannelId,
+				textChannelId: params.textChannelId,
+				selfDeaf: true,
+				selfMute: false,
+				volume: 100, // default volume
+				instaUpdateFiltersFix: true, // optional
+				applyVolumeAsFilter: true // if true player.setVolume(54) -> player.filters.setVolume(0.54)
+			})
   }
 
-  static getPlayerParams(interaction: CommandInteraction | AutocompleteInteraction) {
+  static getPlayerParams(interaction: Interaction<CacheType>) {
     const vcId = (interaction.member as GuildMember)?.voice?.channelId;
     if (!vcId) throw new Error("You are not in a voice channel");
     const vc = (interaction.member as GuildMember)?.voice
@@ -65,11 +70,11 @@ export class LavaPlayerManager {
     return {
       guildId: interaction.guildId ?? "",
       textChannelId: interaction.channelId ?? "",
-      voiceChannel: vcId,
+      voiceChannelId: vcId,
     };
   }
 
-  static async getConnectedPlayer(interaction: CommandInteraction | AutocompleteInteraction) {
+  static async getConnectedPlayer(interaction: Interaction<CacheType>) {
     const player = this.getPlayer(interaction);
     if (player.connected) await player.connect();
     return player

@@ -2,6 +2,8 @@ import {
   ApplicationCommandOptionType,
   AutocompleteInteraction,
   CommandInteraction,
+  type CacheType,
+  type Interaction,
 } from "discord.js";
 import { Discord, Slash, SlashOption } from "discordx";
 import { type Track, type UnresolvedTrack } from "lavalink-client";
@@ -21,7 +23,7 @@ class Play {
       autocomplete: true,
     })
     message: string,
-    interaction: CommandInteraction | AutocompleteInteraction
+    interaction: Interaction<CacheType>
   ): Promise<void> {
     try {
       const player = await LavaPlayerManager.getConnectedPlayer(interaction);
@@ -55,14 +57,9 @@ class Play {
                 .slice(0, 25)
         );
       } else {
-        interaction.reply(String(message));
       }
     } catch (err) {
-        await MessageHelper.handleError(
-          interaction,
-          `query: "${message}"`,
-          err
-        );
+      await MessageHelper.handleError(interaction, `query: "${message}"`, err);
     }
   }
 }
