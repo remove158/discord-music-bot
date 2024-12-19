@@ -46,6 +46,11 @@ export class MessageHelper {
     content: unknown,
     error: unknown,
   ) => {
+    if(interaction.isAutocomplete()) {
+      await interaction.respond([
+        { name: String(error).slice(7), value: randomUUIDv7() },
+      ])
+    }
     if (interaction.isRepliable()) {
       const embded = this.createEmbed("❌ something went wrong", [
         `> **TraceId:** \`${interaction.id}\``,

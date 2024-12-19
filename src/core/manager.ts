@@ -1,4 +1,8 @@
-import { LavalinkManager, parseLavalinkConnUrl } from "lavalink-client";
+import {
+  LavalinkManager,
+  parseLavalinkConnUrl,
+  type SearchResult,
+} from "lavalink-client";
 import { envConfig } from "../env";
 import {
   Events,
@@ -18,10 +22,11 @@ const LavalinkNodesOfEnv = envConfig.LAVALINK_NODES.split(" ")
 export class LavaPlayerManager {
   private static _lavalink: LavalinkManager;
   private static _client: Client;
-  private static autocomplete = new Map()
+  private static autocomplete: Map<string, SearchResult> = new Map();
+  private static autocomplteTimeout = new Map()
 
   static async initLavalink(client: Client) {
-    this._client = client
+    this._client = client;
     this._lavalink = new LavalinkManager({
       nodes: LavalinkNodesOfEnv,
       sendToShard: (guildId, payload) =>
@@ -39,25 +44,27 @@ export class LavaPlayerManager {
         },
       },
     });
-    await this._lavalink.init({...client.user!, shards: "auto"}) //VERY IMPORTANT!
+    await this._lavalink.init({ ...client.user!, shards: "auto" }); //VERY IMPORTANT!
 
-    this._client.on(Events.Raw, d => this._lavalink.sendRawData(d))
+    this._client.on(Events.Raw, (d) => this._lavalink.sendRawData(d));
   }
 
   static getPlayer(interaction: Interaction<CacheType>) {
-    const params = this.getPlayerParams(interaction)
-  
-    return this._lavalink.getPlayer(params.guildId) ||
-			this._lavalink.createPlayer({
-				guildId: params.guildId,
-				voiceChannelId: params.voiceChannelId,
-				textChannelId: params.textChannelId,
-				selfDeaf: true,
-				selfMute: false,
-				volume: 100, // default volume
-				instaUpdateFiltersFix: true, // optional
-				applyVolumeAsFilter: true // if true player.setVolume(54) -> player.filters.setVolume(0.54)
-			})
+    const params = this.getPlayerParams(interaction);
+
+    return (
+      this._lavalink.getPlayer(params.guildId) ||
+      this._lavalink.createPlayer({
+        guildId: params.guildId,
+        voiceChannelId: params.voiceChannelId,
+        textChannelId: params.textChannelId,
+        selfDeaf: true,
+        selfMute: false,
+        volume: 100, // default volume
+        instaUpdateFiltersFix: true, // optional
+        applyVolumeAsFilter: true, // if true player.setVolume(54) -> player.filters.setVolume(0.54)
+      })
+    );
   }
 
   static getPlayerParams(interaction: Interaction<CacheType>) {
@@ -77,6 +84,37 @@ export class LavaPlayerManager {
   static async getConnectedPlayer(interaction: Interaction<CacheType>) {
     const player = this.getPlayer(interaction);
     if (player.connected) await player.connect();
-    return player
+    return player;
+  }
+
+  static setAutocompleteCache(
+    interaction: AutocompleteInteraction<CacheType>,
+    searchResult: SearchResult
+  ) {
+    if (this.autocomplteTimeout.has(`${interaction.user.id}_timeout`))
+      clearTimeout(this.autocomplteTimeout.get(`${interaction.user.id}_timeout`));
+    this.autocomplete.set(`${interaction.user.id}_res`, searchResult);
+    this.autocomplteTimeout.set(
+      `${interaction.user.id}_timeout`,
+      setTimeout(() => {
+        this.autocomplete.delete(`${interaction.user.id}_res`);
+        this.autocomplteTimeout.delete(`${interaction.user.id}_timeout`);
+      }, 25_000)
+    );
+  }
+
+  static getAutoCompleteSearchResult(interaction: Interaction<CacheType>, message: string) {
+    const fromAutoComplete =
+      Number(message.replace("autocomplete_", "")) >= 0 &&
+      this.autocomplete.has(`${interaction.user.id}_res`) &&
+      this.autocomplete.get(`${interaction.user.id}_res`);
+    if (this.autocomplete.has(`${interaction.user.id}_res`)) {
+      if (this.autocomplteTimeout.has(`${interaction.user.id}_timeout`))
+        clearTimeout(this.autocomplteTimeout.get(`${interaction.user.id}_timeout`));
+      this.autocomplete.delete(`${interaction.user.id}_res`);
+      this.autocomplteTimeout.delete(`${interaction.user.id}_timeout`);
+    }
+    if (!fromAutoComplete) return null;
+    return fromAutoComplete;
   }
 }
