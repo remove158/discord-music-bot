@@ -1,59 +1,115 @@
-import { ButtonInteraction } from "discord.js";
+import { randomUUIDv7 } from "bun";
+import {
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonInteraction,
+  ButtonStyle,
+  type MessageActionRowComponentBuilder,
+} from "discord.js";
 import { ButtonComponent, Discord } from "discordx";
 import { LavaPlayerManager } from "../core/manager";
-import { MessageHelper } from "../utils/message-embed";
+import type { Player } from "lavalink-client/dist/types";
+
+export const ButtonActions = {
+  RESUME: "resume",
+  PAUSE: "pause",
+  SKIP: "skip",
+} as const;
 
 @Discord()
 class ButtonHandlers {
-  @ButtonComponent({ id: RegExp("skip:*") })
-  async skipHandler(interaction: ButtonInteraction): Promise<any> {
+  async getPlayer(interaction: ButtonInteraction): Promise<Player | undefined> {
     const player = await LavaPlayerManager.getConnectedPlayer(interaction);
-    if (!player)
-      return interaction.reply({
+    if (!player) {
+      interaction.reply({
         ephemeral: true,
         content: "I'm not connected",
       });
+      return;
+    }
     if (!player.playing) {
-      return interaction.reply({
+      interaction.reply({
         ephemeral: true,
         content: "Nothing is playing",
       });
+      return;
     }
-    await player.skip(0, false);
-    await interaction.reply({
-      content: "Skipped",
-      ephemeral: true,
-    });
+    return player;
   }
 
-  @ButtonComponent({ id: RegExp("play:*") })
-  async playHandler(interaction: ButtonInteraction): Promise<any> {
-    const player = await LavaPlayerManager.getConnectedPlayer(interaction);
-    if (!player)
-      return interaction.reply({
-        ephemeral: true,
-        content: "I'm not connected",
-      });
-
-    const track = await LavaPlayerManager.getTrackFromAction(
-      interaction.customId,
-      interaction.guildId!
+  @ButtonComponent({ id: RegExp(ButtonActions.RESUME) })
+  async resumeHandler(interaction: ButtonInteraction): Promise<any> {
+    const player = await this.getPlayer(interaction);
+    if (!player) return;
+    await player.resume();
+    const message = LavaPlayerManager.getLatestControllerMessage(
+      interaction.guildId ?? ""
     );
-    if (!track)
-      return await interaction.reply({
-        ephemeral: true,
-        content: "Track not found",
+    if (message) {
+      const buttonRow =
+        new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
+          pauseButton,
+          skipButton
+        );
+      await message.edit({
+        components: [buttonRow],
       });
+    }
 
-    if (!player.connected) await player.connect();
-    await player.queue.add(track);
-    if (!player.playing) await player.play();
-    await MessageHelper.replySilent(
-      interaction,
-      MessageHelper.createEmbed({
-        title: "ADDED TRACK",
-        description: MessageHelper.createTrackInfo(track),
-      })
+    await interaction.deferUpdate({});
+  }
+
+  @ButtonComponent({ id: RegExp(ButtonActions.PAUSE) })
+  async pauseHandler(interaction: ButtonInteraction): Promise<any> {
+    const player = await this.getPlayer(interaction);
+    if (!player) return;
+    await player.pause();
+    const message = LavaPlayerManager.getLatestControllerMessage(
+      interaction.guildId ?? ""
     );
+    if (message) {
+      const buttonRow =
+        new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
+          resumeButton,
+          skipButton
+        );
+      await message.edit({
+        components: [buttonRow],
+      });
+    }
+    await interaction.deferUpdate({});
+  }
+
+  @ButtonComponent({ id: RegExp("skip:*") })
+  async skipHandler(interaction: ButtonInteraction): Promise<any> {
+    const player = await this.getPlayer(interaction);
+    if (!player) return;
+    await player.skip(0, false);
+    const message = LavaPlayerManager.getLatestControllerMessage(
+      interaction.guildId ?? ""
+    );
+    if (message) message.delete();
+    interaction.reply({ ephemeral: true, content: "Skipped" });
   }
 }
+
+const createButtonActionId = (
+  action: (typeof ButtonActions)[keyof typeof ButtonActions]
+) => {
+  return action;
+};
+
+export const resumeButton = new ButtonBuilder()
+  .setLabel("▶")
+  .setStyle(ButtonStyle.Success)
+  .setCustomId(createButtonActionId(ButtonActions.RESUME));
+
+export const pauseButton = new ButtonBuilder()
+  .setLabel("▐▐")
+  .setStyle(ButtonStyle.Secondary)
+  .setCustomId(createButtonActionId(ButtonActions.PAUSE));
+
+export const skipButton = new ButtonBuilder()
+  .setLabel("▶|")
+  .setStyle(ButtonStyle.Secondary)
+  .setCustomId(createButtonActionId(ButtonActions.SKIP));

@@ -1,30 +1,26 @@
 import {
-  LavalinkManager,
-  parseLavalinkConnUrl,
-  Player,
-  type SearchResult,
-  type Track,
-} from "lavalink-client";
-import { envConfig } from "../env";
-import {
   ActionRowBuilder,
-  ButtonBuilder,
-  ButtonStyle,
   Events,
+  Message,
   TextChannel,
   type AutocompleteInteraction,
   type CacheType,
-  type CommandInteraction,
   type GuildMember,
   type Interaction,
   type MessageActionRowComponentBuilder,
   type VoiceChannel,
 } from "discord.js";
 import type { Client } from "discordx";
-import { randomUUIDv7 } from "bun";
+import {
+  LavalinkManager,
+  parseLavalinkConnUrl,
+  type SearchResult,
+} from "lavalink-client";
+import { envConfig } from "../env";
+import { pauseButton, skipButton } from "../events/buttons";
 import type { CustomRequester } from "../types";
-import { MessageHelper, SILENT_FLAGS } from "../utils/message-embed";
 import { formatMS_HHMMSS } from "../utils/format";
+import { MessageHelper, SILENT_FLAGS } from "../utils/message-embed";
 
 const LavalinkNodesOfEnv = envConfig.LAVALINK_NODES.split(" ")
   .filter((v) => v.length)
@@ -34,10 +30,7 @@ export class LavaPlayerManager {
   private static _lavalink: LavalinkManager;
   private static _client: Client;
   private static autocomplete: Map<string, SearchResult> = new Map();
-  private static action: Map<
-    string,
-    { url: string | undefined; track: Track | null }
-  > = new Map();
+  private static controllerMessage: Map<string, Message<true>> = new Map();
   private static autocomplteTimeout = new Map();
 
   static async initLavalink(client: Client) {
@@ -65,11 +58,12 @@ export class LavaPlayerManager {
     this.onTrackStart();
   }
 
-  static onTrackStart() {
-    this._lavalink.on("trackStart", (player, track) => {
-      const avatarURL =
-        (track?.requester as CustomRequester)?.avatar || undefined;
+  static getLatestControllerMessage(guildId: string) {
+    return this.controllerMessage.get(guildId);
+  }
 
+  static onTrackStart() {
+    this._lavalink.on("trackStart", async (player, track) => {
       const embded = MessageHelper.createEmbed({
         title: `🎶 ${track?.info?.title}`.substring(0, 256),
         description: [
@@ -86,33 +80,6 @@ export class LavaPlayerManager {
             : undefined,
         ],
       });
-      const PlayButton = new ButtonBuilder()
-        .setLabel("▶")
-        .setStyle(ButtonStyle.Success)
-        .setCustomId(
-          LavaPlayerManager.createButtonActionId(track, ButtonActions.PLAY)
-        );
-
-      const SkipButton = new ButtonBuilder()
-        .setLabel("▶|")
-        .setStyle(ButtonStyle.Secondary)
-        .setCustomId(
-          LavaPlayerManager.createButtonActionId(track, ButtonActions.SKIP)
-        );
-
-      const PauseButton = new ButtonBuilder()
-        .setLabel("◼")
-        .setStyle(ButtonStyle.Secondary)
-        .setCustomId(
-          LavaPlayerManager.createButtonActionId(track, ButtonActions.SKIP)
-        );
-
-      const buttonRow =
-        new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
-          PlayButton,
-          SkipButton,
-          PauseButton
-        );
 
       // some tracks might have a "uri" which is not a valid http url (e.g. spotify local, files, etc.)
       if (track?.info?.uri && /^https?:\/\//.test(track?.info?.uri))
@@ -123,11 +90,19 @@ export class LavaPlayerManager {
       ) as TextChannel;
       if (!channel) return;
 
-      return channel.send({
+      const buttonRow =
+        new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
+          pauseButton,
+          skipButton
+        );
+
+      const message = await channel.send({
         embeds: [embded],
         components: [buttonRow],
         flags: SILENT_FLAGS,
       });
+
+      this.controllerMessage.set(player.guildId, message);
     });
   }
 
@@ -214,42 +189,4 @@ export class LavaPlayerManager {
     }
     return fromAutoComplete || null;
   }
-
-  static createButtonActionId(
-    track: Track,
-    action: (typeof ButtonActions)[keyof typeof ButtonActions]
-  ) {
-    const uuid = randomUUIDv7();
-    const key = `${action}:${uuid}`;
-    this.action.set(key, {
-      track: track,
-      url: track.info.uri,
-    });
-    setTimeout(() => {
-      this.action.set(key, {
-        track: null,
-        url: track.encoded,
-      });
-    }, 60_000 * 10);
-    return key;
-  }
-
-  static async getTrackFromAction(key: string, guildId: string) {
-    const cache = this.action.get(key);
-    if (cache?.track) return cache.track;
-    if (cache?.url) {
-      const player = this._lavalink.getPlayer(guildId);
-      if (!player) return null;
-      const searchResult = await player.search(cache.url, {});
-      if (!searchResult.tracks.length) return null;
-      const track = searchResult.tracks[0];
-      return track as Track;
-    }
-    return null;
-  }
 }
-
-export const ButtonActions = {
-  PLAY: "play",
-  SKIP: "skip",
-} as const;

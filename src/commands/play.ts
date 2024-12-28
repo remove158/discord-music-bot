@@ -15,7 +15,7 @@ import {
   type Track,
   type UnresolvedTrack,
 } from "lavalink-client";
-import { ButtonActions, LavaPlayerManager } from "../core/manager";
+import { LavaPlayerManager } from "../core/manager";
 import { formatMS_HHMMSS } from "../utils/format";
 import { MessageHelper } from "../utils/message-embed";
 
@@ -84,33 +84,17 @@ class Play {
         await MessageHelper.replySilent(
           interaction,
           MessageHelper.createEmbed({
-            description: this.createAddedResult(searchResult, player, track),
+            description: MessageHelper.createAddedResult(
+              searchResult,
+              player,
+              track
+            ),
           })
         );
       }
     } catch (err) {
       await MessageHelper.handleError(interaction, `query: "${message}"`, err);
     }
-  }
-
-  createAddedResult(searchResult: SearchResult, player: Player, track: Track) {
-    return searchResult.loadType === "playlist"
-      ? `✅ Added [${searchResult.tracks.length}] Tracks${
-          searchResult.playlist?.title
-            ? ` - from the ${searchResult.pluginInfo.type || "Playlist"} ${
-                searchResult.playlist.uri
-                  ? `[\`${searchResult.playlist.title}\`](<${searchResult.playlist.uri}>)`
-                  : `\`${searchResult.playlist.title}\``
-              }`
-            : ""
-        } at \`#${player.queue.tracks.length - searchResult.tracks.length}\``
-      : this.createTrackInfo(track);
-  }
-
-  createTrackInfo(track: Track) {
-    return `Added  [**${track.info.title}**](${
-      track.info.uri
-    }) - \`${formatMS_HHMMSS(track.info.duration)}\``;
   }
 
   createOptions(searchResult: SearchResult) {
