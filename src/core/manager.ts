@@ -22,6 +22,7 @@ import { pauseButton, skipButton } from "../events/buttons";
 import type { CustomRequester } from "../types";
 import { formatMS_HHMMSS } from "../utils/format";
 import { MessageHelper, SILENT_FLAGS } from "../utils/message-embed";
+import { autoPlayFunction } from "../events/autoplay";
 
 const LavalinkNodesOfEnv = envConfig.LAVALINK_NODES.split(" ")
   .filter((v) => v.length)
@@ -58,7 +59,7 @@ export class LavaPlayerManager {
         },
         onEmptyQueue: {
           destroyAfterMs: 300_000,
-          // autoPlayFunction: autoPlayFunction(client)
+          autoPlayFunction: autoPlayFunction(client),
         },
       },
     });

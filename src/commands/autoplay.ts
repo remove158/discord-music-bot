@@ -6,12 +6,12 @@ import { LavaPlayerManager } from "../core/manager";
 class autoplay {
   @Slash({ description: "toggle autoplay", name: "autoplay" })
   async handleAutoplay(interaction: CommandInteraction): Promise<any> {
-    interaction.deferReply();
+    await interaction.deferReply();
     const autoplay = LavaPlayerManager.getAutoplay(interaction.guildId!);
     LavaPlayerManager.setAutoplay(interaction.guildId!, !autoplay);
     return interaction.followUp({
       ephemeral: true,
-      content: `Autoplay: ${!autoplay}`,
+      content: `Autoplay: \`${!autoplay ? "On" : "Off"}\``,
     });
   }
 }
