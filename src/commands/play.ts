@@ -15,17 +15,12 @@ import {
   type Track,
   type UnresolvedTrack,
 } from "lavalink-client";
-import { LavaPlayerManager } from "../core/manager";
+import { ButtonActions, LavaPlayerManager } from "../core/manager";
 import { formatMS_HHMMSS } from "../utils/format";
 import { MessageHelper } from "../utils/message-embed";
 
 @Discord()
 class Play {
-  @ButtonComponent({ id: "hello" })
-  buttonHandler(interaction: ButtonInteraction): void {
-    interaction.reply(interaction.customId);
-  }
-
   @Slash({ description: "play the music", name: "play" })
   async handler(
     @SlashOption({
@@ -68,7 +63,7 @@ class Play {
           )) as SearchResult);
 
         if (!searchResult || !searchResult.tracks?.length) {
-          return interaction.reply({
+          return interaction.followUp({
             content: `No Tracks found`,
             ephemeral: true,
           });
@@ -86,24 +81,11 @@ class Play {
 
         if (!player.playing) await player.play({ volume: 100, paused: false });
 
-        const btn = new ButtonBuilder()
-          .setLabel("Hello")
-          .setStyle(ButtonStyle.Link)
-          .setCustomId(track.encoded ?? "");
-
-        const buttonRow =
-          new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
-            btn
-          );
         await MessageHelper.replySilent(
           interaction,
-          MessageHelper.createEmbed(
-            searchResult.loadType === "playlist"
-              ? "ADDED TRACKS"
-              : "ADDED TRACK",
-            this.createAddedResult(searchResult, player, track)
-          ),
-          [buttonRow]
+          MessageHelper.createEmbed({
+            description: this.createAddedResult(searchResult, player, track),
+          })
         );
       }
     } catch (err) {
@@ -122,9 +104,13 @@ class Play {
               }`
             : ""
         } at \`#${player.queue.tracks.length - searchResult.tracks.length}\``
-      : `[${formatMS_HHMMSS(track.info.duration)}] [${track.info.title}](${
-          track.info.uri
-        }) (by ${track.info.author || "Unknown-Author"})`;
+      : this.createTrackInfo(track);
+  }
+
+  createTrackInfo(track: Track) {
+    return `Added  [**${track.info.title}**](${
+      track.info.uri
+    }) - \`${formatMS_HHMMSS(track.info.duration)}\``;
   }
 
   createOptions(searchResult: SearchResult) {
