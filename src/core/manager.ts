@@ -13,6 +13,7 @@ import {
 import type { Client } from "discordx";
 import {
   LavalinkManager,
+  MiniMap,
   parseLavalinkConnUrl,
   type SearchResult,
 } from "lavalink-client";
@@ -32,6 +33,15 @@ export class LavaPlayerManager {
   private static autocomplete: Map<string, SearchResult> = new Map();
   private static controllerMessage: Map<string, Message<true>> = new Map();
   private static autocomplteTimeout = new Map();
+  private static autoplay: MiniMap<string, boolean> = new MiniMap();
+
+  static setAutoplay(guildId: string, autoplay: boolean) {
+    this.autoplay.set(guildId, autoplay);
+  }
+
+  static getAutoplay(guildId: string) {
+    return this.autoplay.get(guildId) || false;
+  }
 
   static async initLavalink(client: Client) {
     this._client = client;
@@ -64,7 +74,7 @@ export class LavaPlayerManager {
 
   static onTrackStart() {
     this._lavalink.on("trackStart", async (player, track) => {
-      const embded = MessageHelper.createEmbed({
+      const embed = MessageHelper.createEmbed({
         title: `🎶 ${track?.info?.title}`.substring(0, 256),
         description: [
           `> - **Author:** ${track?.info?.author}`,
@@ -81,9 +91,7 @@ export class LavaPlayerManager {
         ],
       });
 
-      // some tracks might have a "uri" which is not a valid http url (e.g. spotify local, files, etc.)
-      if (track?.info?.uri && /^https?:\/\//.test(track?.info?.uri))
-        embded.setURL(track.info.uri);
+      embed.setThumbnail(track.info.artworkUrl);
 
       const channel = this._client.channels.cache.get(
         player.textChannelId!
@@ -97,7 +105,7 @@ export class LavaPlayerManager {
         );
 
       const message = await channel.send({
-        embeds: [embded],
+        embeds: [embed],
         components: [buttonRow],
         flags: SILENT_FLAGS,
       });

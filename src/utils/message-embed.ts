@@ -138,9 +138,9 @@ export class MessageHelper {
   }
 
   static createTrackInfo(track: Track) {
-    return `[${formatMS_HHMMSS(track.info.duration)}] [${track.info.title}](${
+    return `Added [${track.info.title}](${
       track.info.uri
-    }) (by ${track.info.author || "Unknown-Author"})`;
+    }) - \`${formatMS_HHMMSS(track.info.duration)}\``;
   }
 
   static createOptions(searchResult: SearchResult) {
