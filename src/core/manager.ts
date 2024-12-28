@@ -23,7 +23,7 @@ export class LavaPlayerManager {
   private static _lavalink: LavalinkManager;
   private static _client: Client;
   private static autocomplete: Map<string, SearchResult> = new Map();
-  private static autocomplteTimeout = new Map()
+  private static autocomplteTimeout = new Map();
 
   static async initLavalink(client: Client) {
     this._client = client;
@@ -91,30 +91,45 @@ export class LavaPlayerManager {
     interaction: AutocompleteInteraction<CacheType>,
     searchResult: SearchResult
   ) {
-    if (this.autocomplteTimeout.has(`${interaction.user.id}_timeout`))
-      clearTimeout(this.autocomplteTimeout.get(`${interaction.user.id}_timeout`));
-    this.autocomplete.set(`${interaction.user.id}_res`, searchResult);
+    const timeoutKey = this.createTimeoutKey(interaction);
+    const responseKey = this.createResponseKey(interaction);
+
+    if (this.autocomplteTimeout.has(timeoutKey))
+      clearTimeout(this.autocomplteTimeout.get(timeoutKey));
+    this.autocomplete.set(responseKey, searchResult);
     this.autocomplteTimeout.set(
-      `${interaction.user.id}_timeout`,
+      timeoutKey,
       setTimeout(() => {
-        this.autocomplete.delete(`${interaction.user.id}_res`);
-        this.autocomplteTimeout.delete(`${interaction.user.id}_timeout`);
+        this.autocomplete.delete(responseKey);
+        this.autocomplteTimeout.delete(timeoutKey);
       }, 25_000)
     );
   }
+  static createTimeoutKey(interaction: Interaction<CacheType>) {
+    return `${interaction.user.id}_timeout`;
+  }
 
-  static getAutoCompleteSearchResult(interaction: Interaction<CacheType>, message: string) {
+  static createResponseKey(interaction: Interaction<CacheType>) {
+    return `${interaction.user.id}_res`;
+  }
+
+  static getAutoCompleteSearchResult(
+    interaction: Interaction<CacheType>,
+    message: string
+  ) {
+    const timeoutKey = this.createTimeoutKey(interaction);
+    const responseKey = this.createResponseKey(interaction);
+
     const fromAutoComplete =
       Number(message.replace("autocomplete_", "")) >= 0 &&
-      this.autocomplete.has(`${interaction.user.id}_res`) &&
-      this.autocomplete.get(`${interaction.user.id}_res`);
-    if (this.autocomplete.has(`${interaction.user.id}_res`)) {
-      if (this.autocomplteTimeout.has(`${interaction.user.id}_timeout`))
-        clearTimeout(this.autocomplteTimeout.get(`${interaction.user.id}_timeout`));
-      this.autocomplete.delete(`${interaction.user.id}_res`);
-      this.autocomplteTimeout.delete(`${interaction.user.id}_timeout`);
+      this.autocomplete.has(responseKey) &&
+      this.autocomplete.get(responseKey);
+    if (this.autocomplete.has(responseKey)) {
+      if (this.autocomplteTimeout.has(timeoutKey))
+        clearTimeout(this.autocomplteTimeout.get(timeoutKey));
+      this.autocomplete.delete(responseKey);
+      this.autocomplteTimeout.delete(timeoutKey);
     }
-    if (!fromAutoComplete) return null;
-    return fromAutoComplete;
+    return fromAutoComplete || null;
   }
 }
