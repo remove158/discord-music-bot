@@ -118,7 +118,20 @@ export class LavaPlayerManager {
       const message = LavaPlayerManager.getLatestControllerMessage(
         player.guildId
       );
-      if (message) message.delete();
+      if (message && message.editable)
+        message.edit({
+          components: [],
+        });
+    });
+
+    this._lavalink.on("queueEnd", async (player, track) => {
+      const message = LavaPlayerManager.getLatestControllerMessage(
+        player.guildId
+      );
+      if (message && message.editable)
+        message.edit({
+          components: [],
+        });
     });
   }
 
