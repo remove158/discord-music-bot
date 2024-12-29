@@ -37,15 +37,13 @@ jobs:
       - name: Build and push discord
         uses: docker/build-push-action@v6
         with:
-          context: .
-          file: apps/discord/Dockerfile
+          context: apps/discord
           platforms: linux/amd64,linux/arm64
           tags: ${{ env.REGISTRY }}/discord
 
       - name: Build and push player
         uses: docker/build-push-action@v6
         with:
-          context: .
-          file: apps/player/Dockerfile
+          context: apps/player
           platforms: linux/amd64,linux/arm64
           tags: ${{ env.REGISTRY }}/player
