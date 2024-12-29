@@ -66,14 +66,14 @@ export class LavaPlayerManager {
     await this._lavalink.init({ ...client.user!, shards: "auto" }); //VERY IMPORTANT!
 
     this._client.on(Events.Raw, (d) => this._lavalink.sendRawData(d));
-    this.onTrackStart();
+    this.listenEvent();
   }
 
   static getLatestControllerMessage(guildId: string) {
     return this.controllerMessage.get(guildId);
   }
 
-  static onTrackStart() {
+  static listenEvent() {
     this._lavalink.on("trackStart", async (player, track) => {
       const embed = MessageHelper.createEmbed({
         title: `🎶 ${track?.info?.title}`.substring(0, 256),
@@ -112,6 +112,13 @@ export class LavaPlayerManager {
       });
 
       this.controllerMessage.set(player.guildId, message);
+    });
+
+    this._lavalink.on("trackEnd", async (player, track) => {
+      const message = LavaPlayerManager.getLatestControllerMessage(
+        player.guildId
+      );
+      if (message) message.delete();
     });
   }
 

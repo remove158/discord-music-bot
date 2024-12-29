@@ -85,10 +85,6 @@ class ButtonHandlers {
     const player = await this.getPlayer(interaction);
     if (!player) return;
     await player.skip(0, false);
-    const message = LavaPlayerManager.getLatestControllerMessage(
-      interaction.guildId ?? ""
-    );
-    if (message) message.delete();
     interaction.reply({ ephemeral: true, content: "Skipped" });
   }
 }
