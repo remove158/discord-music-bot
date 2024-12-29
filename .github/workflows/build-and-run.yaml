@@ -1,47 +1,28 @@
 name: Build and Run Image
 
 on:
-    push:
-        branches: [master]
+  push:
+    branches: [master, dev]
 
 jobs:
-    build:
-        runs-on: self-hosted
-        steps:
-            - uses: actions/checkout@v3
-            - name: Build Docker image
-              run: make build
-            - name: Login to Docker Hub (optional)
-              run: |
-                  docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
-                  echo "Logged in to Docker Hub"
-              env:
-                  DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-                  DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-
-            - name: Build Docker image
-              uses: docker/build-push-action@v3
-              with:
-                  context: . # Build context (current directory)
-                  file: ./Dockerfile # Path to your Dockerfile
-                  push: false # Push image after building
-                  tags: remove158/discord:latest
-    setup:
-        runs-on: self-hosted
-        needs: build
+  build:
+    runs-on: ubuntu
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build Docker image
+        run: make build
+      - name: Login to Docker Hub (optional)
+        run: |
+          docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+          echo "Logged in to Docker Hub"
         env:
-            CLIENT_ID: ${{ secrets.CLIENT_ID }}
-            DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
-        steps:
-            - name: create environment
-              run: make env
-            - name: start player
-              run: docker compose up player -d
-            - name: pull new docker image
-              run: docker compose pull bot
-    deploy:
-        runs-on: self-hosted
-        needs: setup
-        steps:
-            - name: restart discord bot
-              run: docker compose down bot && docker compose up bot -d --build
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v3
+        with:
+          context: . # Build context (current directory)
+          file: ./Dockerfile # Path to your Dockerfile
+          push: false # Push image after building
+          tags: remove158/discord:latest
