@@ -39,11 +39,13 @@ jobs:
         with:
           context: apps/discord
           platforms: linux/amd64,linux/arm64
-          tags: ${{ env.REGISTRY }}/discord
+          tags: ${{ env.REGISTRY }}/remove158/discord
+          push: true
 
       - name: Build and push player
         uses: docker/build-push-action@v6
         with:
           context: apps/player
           platforms: linux/amd64,linux/arm64
-          tags: ${{ env.REGISTRY }}/player
+          tags: ${{ env.REGISTRY }}/remove158/player
+          push: true
