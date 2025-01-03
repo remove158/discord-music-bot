@@ -1,23 +1,20 @@
 import { EmbedBuilder } from "@discordjs/builders";
 import { randomUUIDv7 } from "bun";
 import type {
-  AutocompleteInteraction,
   CacheType,
-  CommandInteraction,
   EmbedFooterOptions,
   Interaction,
   InteractionReplyOptions,
   RepliableInteraction,
   User,
 } from "discord.js";
-import { envConfig } from "../env";
-import type { ArgsOf } from "discordx";
 import type {
   Player,
   SearchResult,
   Track,
   UnresolvedTrack,
 } from "lavalink-client/dist/types";
+import { envConfig } from "../env";
 import { formatMS_HHMMSS } from "./format";
 
 const COLOR = 0xf29fbb;
@@ -77,9 +74,7 @@ export class MessageHelper {
     error: unknown
   ) => {
     if (interaction.isAutocomplete()) {
-      await interaction.respond([
-        { name: String(error).slice(7), value: randomUUIDv7() },
-      ]);
+      await interaction.respond([{ name: String(error).slice(7), value: "-" }]);
     }
     if (interaction.isRepliable()) {
       const embded = this.createEmbed({

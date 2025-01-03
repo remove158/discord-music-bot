@@ -14,6 +14,7 @@ export const ButtonActions = {
   RESUME: "resume",
   PAUSE: "pause",
   SKIP: "skip",
+  DESTORY: "destory",
 } as const;
 
 @Discord()
@@ -49,7 +50,8 @@ class ButtonHandlers {
       const buttonRow =
         new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
           pauseButton,
-          skipButton
+          skipButton,
+          destoryButton
         );
       await message.edit({
         components: [buttonRow],
@@ -71,7 +73,8 @@ class ButtonHandlers {
       const buttonRow =
         new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
           resumeButton,
-          skipButton
+          skipButton,
+          destoryButton
         );
       await message.edit({
         components: [buttonRow],
@@ -80,12 +83,20 @@ class ButtonHandlers {
     await interaction.deferUpdate({});
   }
 
-  @ButtonComponent({ id: RegExp("skip:*") })
+  @ButtonComponent({ id: RegExp(ButtonActions.SKIP) })
   async skipHandler(interaction: ButtonInteraction): Promise<any> {
     const player = await this.getPlayer(interaction);
     if (!player) return;
     await player.skip(0, false);
     interaction.reply({ ephemeral: true, content: "Skipped" });
+  }
+
+  @ButtonComponent({ id: RegExp(ButtonActions.DESTORY) })
+  async destroyPlayer(interaction: ButtonInteraction): Promise<any> {
+    const player = await this.getPlayer(interaction);
+    if (!player) return;
+    await player.destroy();
+    interaction.reply({ ephemeral: true, content: "Stopped" });
   }
 }
 
@@ -101,11 +112,16 @@ export const resumeButton = new ButtonBuilder()
   .setCustomId(createButtonActionId(ButtonActions.RESUME));
 
 export const pauseButton = new ButtonBuilder()
-  .setLabel("▐▐")
+  .setLabel("⏸")
   .setStyle(ButtonStyle.Secondary)
   .setCustomId(createButtonActionId(ButtonActions.PAUSE));
 
 export const skipButton = new ButtonBuilder()
-  .setLabel("▶|")
+  .setLabel("⏯")
   .setStyle(ButtonStyle.Secondary)
   .setCustomId(createButtonActionId(ButtonActions.SKIP));
+
+export const destoryButton = new ButtonBuilder()
+  .setLabel("◼")
+  .setStyle(ButtonStyle.Secondary)
+  .setCustomId(createButtonActionId(ButtonActions.DESTORY));

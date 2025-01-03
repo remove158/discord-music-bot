@@ -12,7 +12,6 @@ export class Bot {
     return this._client;
   }
 
-
   static async start(): Promise<void> {
     this._client = new Client({
       intents: [
@@ -21,11 +20,12 @@ export class Bot {
         GatewayIntentBits.MessageContent,
         GatewayIntentBits.GuildMessages,
       ],
-      silent: false,
+      silent: true,
     });
 
-    
-    await importx(`${dirname(import.meta.url)}/../{commands,events}/**/*.{js,ts}`);
+    await importx(
+      `${dirname(import.meta.url)}/../{commands,events}/**/*.{js,ts}`
+    );
     await this._client.login(envConfig.DISCORD_TOKEN);
   }
 }

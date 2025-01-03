@@ -18,7 +18,7 @@ import {
   type SearchResult,
 } from "lavalink-client";
 import { envConfig } from "../env";
-import { pauseButton, skipButton } from "../events/buttons";
+import { destoryButton, pauseButton, skipButton } from "../events/buttons";
 import type { CustomRequester } from "../types";
 import { formatMS_HHMMSS } from "../utils/format";
 import { MessageHelper, SILENT_FLAGS } from "../utils/message-embed";
@@ -102,7 +102,8 @@ export class LavaPlayerManager {
       const buttonRow =
         new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
           pauseButton,
-          skipButton
+          skipButton,
+          destoryButton
         );
 
       const message = await channel.send({
