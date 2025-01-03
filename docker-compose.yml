@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  player:
+    image: ghcr.io/remove158/player:latest
+    environment:
+      - POT_TOKEN=${POT_TOKEN}
+      - VISITOR_DATA=${VISITOR_DATA}
+      - LAVA_LINK_PASSWORD=${LAVA_LINK_PASSWORD}
+    ports:
+      - "2333:2333"

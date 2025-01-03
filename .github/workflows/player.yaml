@@ -60,10 +60,6 @@ jobs:
             ${{ steps.version.outputs.version_tag }}
             ${{ steps.version.outputs.latest_tag }}
           push: true
-          build-args: |
-            POT_TOKEN=${{ secrets.POT_TOKEN }}
-            VISITOR_DATA=${{ secrets.VISITOR_DATA }}
-            LAVA_LINK_PASSWORD=${{ secrets.LAVA_LINK_PASSWORD }}
           labels: |
             org.opencontainers.image.version=${{ steps.version.outputs.version }}
             org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
