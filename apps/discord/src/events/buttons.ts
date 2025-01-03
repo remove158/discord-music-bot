@@ -46,7 +46,7 @@ class ButtonHandlers {
     const message = LavaPlayerManager.getLatestControllerMessage(
       interaction.guildId ?? ""
     );
-    if (message) {
+    if (message?.editable) {
       const buttonRow =
         new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
           pauseButton,
@@ -69,7 +69,7 @@ class ButtonHandlers {
     const message = LavaPlayerManager.getLatestControllerMessage(
       interaction.guildId ?? ""
     );
-    if (message) {
+    if (message?.editable) {
       const buttonRow =
         new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
           resumeButton,
@@ -96,6 +96,13 @@ class ButtonHandlers {
     const player = await this.getPlayer(interaction);
     if (!player) return;
     await player.destroy();
+    const message = LavaPlayerManager.getLatestControllerMessage(
+      interaction.guildId ?? ""
+    );
+    if (message?.editable)
+      await message.edit({
+        components: [],
+      });
     interaction.reply({ ephemeral: true, content: "Stopped" });
   }
 }
