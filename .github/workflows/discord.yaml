@@ -1,0 +1,49 @@
+name: Build Discord Bot
+
+on:
+  push:
+    tags:
+      - "discord"
+
+env:
+  REGISTRY: ghcr.io
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          sparse-checkout: |
+            apps/discord
+          sparse-checkout-cone-mode: false
+
+      - name: Set up Docker
+        uses: docker/setup-docker-action@v4
+        with:
+          daemon-config: |
+            {
+              "debug": true,
+              "features": {
+                "containerd-snapshotter": true
+              }
+            }
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Build and push discord
+        uses: docker/build-push-action@v6
+        with:
+          context: apps/discord
+          platforms: linux/amd64,linux/arm64
+          tags: ${{ env.REGISTRY }}/remove158/discord
+          push: true
