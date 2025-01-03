@@ -3,10 +3,11 @@ name: Build Discord Bot
 on:
   push:
     tags:
-      - "discord"
+      - "discord-v*"
 
 env:
   REGISTRY: ghcr.io
+  IMAGE_NAME: remove158/discord
 
 jobs:
   docker:
@@ -18,6 +19,16 @@ jobs:
           sparse-checkout: |
             apps/discord
           sparse-checkout-cone-mode: false
+
+      - name: Extract version from tag
+        id: version
+        run: |
+          # Extract version from tag (e.g., discord-v1.0.0 -> v1.0.0)
+          VERSION=${GITHUB_REF_NAME#discord-}
+          # Also create latest tag
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "version_tag=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:$VERSION" >> $GITHUB_OUTPUT
+          echo "latest_tag=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest" >> $GITHUB_OUTPUT
 
       - name: Set up Docker
         uses: docker/setup-docker-action@v4
@@ -45,5 +56,10 @@ jobs:
         with:
           context: apps/discord
           platforms: linux/amd64,linux/arm64
-          tags: ${{ env.REGISTRY }}/remove158/discord
+          tags: |
+            ${{ steps.version.outputs.version_tag }}
+            ${{ steps.version.outputs.latest_tag }}
           push: true
+          labels: |
+            org.opencontainers.image.version=${{ steps.version.outputs.version }}
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
