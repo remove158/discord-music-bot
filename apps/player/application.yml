@@ -12,8 +12,8 @@ plugins:
         # The clients to use for track loading. See below for a list of valid clients.
         # Clients are queried in the order they are given (so the first client is queried first and so on...)
         pot:
-            token: "MnQoiQBkdzeMuCixettZIQJX-p5gyiN3gEcT6nhXg3hlDJFrMMxrGvts0CtUP5Wqmx15tcfHsBfWv_ydFQLny02hNUSilkES5deyyIGDO60bPbU76RAE1-qt8Gt2GD5YHNAOwlajZVIovhAUoUzRH0VSbvbK5A=="
-            visitorData: "CgtUeGVwX2t6TzNkZyi5iJi4BjIKCgJUSBIEGgAgTQ%3D%3D"
+            token: ${POT_TOKEN}
+            visitorData: ${VISITOR_DATA}
         clients:
             - MUSIC
             - TVHTML5EMBEDDED
@@ -28,7 +28,7 @@ lavalink:
         - dependency: 'dev.lavalink.youtube:youtube-plugin:1.11.1'
           snapshot: false # Set to true if you want to use a snapshot version.
     server:
-        password: 'password'
+        password: ${LAVA_LINK_PASSWORD}
         sources:
             # The default Youtube source is now deprecated and won't receive further updates. Please use https://github.com/lavalink-devs/youtube-source#plugin instead.
             youtube: false

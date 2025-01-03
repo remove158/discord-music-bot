@@ -47,3 +47,7 @@ jobs:
           platforms: linux/amd64,linux/arm64
           tags: ${{ env.REGISTRY }}/remove158/player
           push: true
+          build-args: |
+            POT_TOKEN=${{ secrets.POT_TOKEN }}
+            VISITOR_DATA=${{ secrets.VISITOR_DATA }}
+            LAVA_LINK_PASSWORD=${{ secrets.LAVA_LINK_PASSWORD }}
