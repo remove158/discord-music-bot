@@ -26,7 +26,7 @@ lavalink:
       repository: "https://maven.lavalink.dev/releases"
       snapshot: false # Set to true if you want to use a snapshot version.
     - dependency: "dev.lavalink.youtube:youtube-plugin:${YOUTUBE_PLUGIN_VERSION}"
-      snapshot: true # Set to true if you want to use a snapshot version.
+      snapshot: false # Set to true if you want to use a snapshot version.
   server:
     password: ${LAVA_LINK_PASSWORD}
     sources:
