@@ -23,10 +23,9 @@ lavalink:
   plugins:
     # Replace VERSION with the current version as shown by the Releases tab or a long commit hash for snapshots.
     - dependency: "com.github.topi314.sponsorblock:sponsorblock-plugin:${SPONSORBLOCK_PLUGIN_VERSION}"
-      repository: "${SPONSORBLOCK_PLUGIN_REPOSITORY}"
-      snapshot: ${IS_SNAPSHOT} # Set to true if you want to use a snapshot version.
+      repository: "https://maven.lavalink.dev/releases"
     - dependency: "dev.lavalink.youtube:youtube-plugin:${YOUTUBE_PLUGIN_VERSION}"
-      snapshot: false # Set to true if you want to use a snapshot version.
+      snapshot: ${IS_SNAPSHOT} # Set to true if you want to use a snapshot version.
   server:
     password: ${LAVA_LINK_PASSWORD}
     sources:
