@@ -24,7 +24,7 @@ lavalink:
     # Replace VERSION with the current version as shown by the Releases tab or a long commit hash for snapshots.
     - dependency: "com.github.topi314.sponsorblock:sponsorblock-plugin:${SPONSORBLOCK_PLUGIN_VERSION}"
       repository: "https://maven.lavalink.dev/releases"
-    - dependency: dev.lavalink.youtube:youtube-plugin:${YOUTUBE_PLUGIN_VERSION}
+    - dependency: dev.lavalink.youtube:youtube-plugin:5ce67f60c656e0dc60687ea7b471663c8718ea1c
       repository: https://maven.kikkia.dev/snapshots
   server:
     password: ${LAVA_LINK_PASSWORD}
