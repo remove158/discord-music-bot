@@ -88,14 +88,6 @@ export class MessageHelper {
       });
       await this.replySilent(interaction, embded);
     }
-    this.sendErrorToOwner(interaction, content, error);
-  };
-
-  static sendErrorToOwner = async (
-    interaction: Interaction<CacheType>,
-    content: unknown,
-    error: unknown
-  ) => {
     const embded = this.createEmbed({
       title: "❌ something went wrong",
       description: [
@@ -108,6 +100,10 @@ export class MessageHelper {
         `> **Requestor:** \`${interaction.user.globalName} (${interaction.user.username})\``,
       ],
     });
+    this.sendErrorToOwner(embded);
+  };
+
+  static sendErrorToOwner = async (embded: EmbedBuilder) => {
     if (this?._owner?.send) {
       this._owner.send({ embeds: [embded] });
     }

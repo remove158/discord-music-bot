@@ -18,11 +18,11 @@ import {
   type SearchResult,
 } from "lavalink-client";
 import { envConfig } from "../env";
+import { autoPlayFunction } from "../events/autoplay";
 import { destoryButton, pauseButton, skipButton } from "../events/buttons";
 import type { CustomRequester } from "../types";
 import { formatMS_HHMMSS } from "../utils/format";
 import { MessageHelper, SILENT_FLAGS } from "../utils/message-embed";
-import { autoPlayFunction } from "../events/autoplay";
 
 const LavalinkNodesOfEnv = envConfig.LAVALINK_NODES.split(" ")
   .filter((v) => v.length)
@@ -119,6 +119,60 @@ export class LavaPlayerManager {
       const message = LavaPlayerManager.getLatestControllerMessage(
         player.guildId
       );
+      if (message && message.editable)
+        message.edit({
+          components: [],
+        });
+    });
+
+    this._lavalink.on("trackError", async (player, track, err) => {
+      const channel = this._client.channels.cache.get(
+        player.textChannelId!
+      ) as TextChannel;
+      LavaPlayerManager.setAutoplay(player.guildId!, false);
+      const ownerEmb = MessageHelper.createEmbed({
+        title: "❌ something went wrong",
+        description: [
+          `> **Type:** \`${err.op}\``,
+          `> **Message:** \`${err.exception?.message}\``,
+          `> **Cause:** \`${err.exception?.cause}\``,
+        ],
+      });
+      MessageHelper.sendErrorToOwner(ownerEmb);
+
+      if (!channel) return;
+      const embed = MessageHelper.createEmbed({
+        title:
+          `❌  เกิดข้อผิดพลาดในการเล่นเพลง ${track?.info?.title}`.substring(
+            0,
+            256
+          ),
+        description: [
+          `> - **Author:** ${track?.info?.author}`,
+          `> - **Duration:** ${formatMS_HHMMSS(
+            track?.info?.duration || 0
+          )} | Ends <t:${Math.floor(
+            (Date.now() + (track?.info?.duration || 0)) / 1000
+          )}:R>`,
+          `> - **Source:** ${track?.info?.sourceName}`,
+          `> - **Requester:** <@${(track?.requester as CustomRequester)?.id}>`,
+          track?.pluginInfo?.clientData?.fromAutoplay
+            ? `> *From Autoplay* ✅`
+            : undefined,
+        ],
+      });
+      if (track?.info.artworkUrl) embed.setThumbnail(track.info.artworkUrl);
+
+      await channel.send({
+        embeds: [embed],
+        components: [],
+        flags: SILENT_FLAGS,
+      });
+
+      const message = LavaPlayerManager.getLatestControllerMessage(
+        player.guildId
+      );
+
       if (message && message.editable)
         message.edit({
           components: [],
