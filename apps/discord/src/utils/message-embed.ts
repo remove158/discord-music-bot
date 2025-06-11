@@ -1,5 +1,4 @@
 import { EmbedBuilder } from "@discordjs/builders";
-import { randomUUIDv7 } from "bun";
 import type {
   CacheType,
   EmbedFooterOptions,
@@ -74,7 +73,7 @@ export class MessageHelper {
     error: unknown
   ) => {
     if (interaction.isAutocomplete()) {
-      await interaction.respond([{ name: String(error).slice(7), value: "-" }]);
+      await interaction.respond([{ name: "ยังไม่พร้อมใช้งาน", value: "-" }]);
     }
     if (interaction.isRepliable()) {
       const embded = this.createEmbed({
