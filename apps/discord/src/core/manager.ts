@@ -1,5 +1,6 @@
 import {
   ActionRowBuilder,
+  ActivityType,
   Events,
   Message,
   TextChannel,
@@ -75,6 +76,10 @@ export class LavaPlayerManager {
 
   static listenEvent() {
     this._lavalink.on("trackStart", async (player, track) => {
+      this._client.user?.setActivity({
+        name: "Ready to use!",
+        type: ActivityType.Listening,
+      });
       const embed = MessageHelper.createEmbed({
         title: `🎶 ${track?.info?.title}`.substring(0, 256),
         description: [
@@ -139,6 +144,11 @@ export class LavaPlayerManager {
         ],
       });
       MessageHelper.sendErrorToOwner(ownerEmb);
+
+      this._client.user?.setActivity({
+        name: "❌ something went wrong",
+        type: ActivityType.Custom,
+      });
 
       if (!channel) return;
       const embed = MessageHelper.createEmbed({

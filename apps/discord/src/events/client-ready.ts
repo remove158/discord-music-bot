@@ -1,5 +1,5 @@
-import {  Events } from "discord.js";
-import { Bot, Client, Discord, On, Once, type ArgsOf } from "discordx";
+import { ActivityType, Events } from "discord.js";
+import { Client, Discord, On, type ArgsOf } from "discordx";
 import { LavaPlayerManager } from "../core/manager";
 
 @Discord()
@@ -8,9 +8,13 @@ class OnClientReady {
   async handle(
     [message]: ArgsOf<Events.ClientReady>, // Type message automatically
     client: Client, // Client instance injected here,
-    guardPayload: any,
+    guardPayload: any
   ) {
-    await client.initApplicationCommands()
-    await LavaPlayerManager.initLavalink(client)
+    await client.initApplicationCommands();
+    client.user?.setActivity({
+      name: "Ready to use!",
+      type: ActivityType.Listening,
+    });
+    await LavaPlayerManager.initLavalink(client);
   }
 }
