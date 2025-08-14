@@ -1,11 +1,28 @@
-version: '3.8'
+version: "3.8"
 
 services:
+  bot:
+    image: ghcr.io/remove158/discord:latest
+    container_name: bot
+    restart: unless-stopped
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+    links:
+      - player
+    environment:
+      - CLIENT_ID=${CLIENT_ID}
+      - DISCORD_TOKEN=${DISCORD_TOKEN}
+      - LAVALINK_NODES=${LAVALINK_NODES}
+      - OWNER_USERNAME=${OWNER_USERNAME}
+
   player:
     image: ghcr.io/remove158/player:latest
     environment:
       - POT_TOKEN=${POT_TOKEN}
       - VISITOR_DATA=${VISITOR_DATA}
       - LAVA_LINK_PASSWORD=${LAVA_LINK_PASSWORD}
+      - YOUTUBE_PLUGIN_VERSION=${YOUTUBE_PLUGIN_VERSION}
+      - IS_SNAPSHOT=${IS_SNAPSHOT}
+      - SPONSORBLOCK_PLUGIN_VERSION=${SPONSORBLOCK_PLUGIN_VERSION}
     ports:
       - "2333:2333"
