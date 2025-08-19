@@ -73,7 +73,7 @@ export class MessageHelper {
     error: unknown
   ) => {
     if (interaction.isAutocomplete()) {
-      await interaction.respond([{ name: "ยังไม่พร้อมใช้งาน", value: "-" }]);
+      await interaction.respond([{ name: String(error), value: "-" }]);
     }
     if (interaction.isRepliable()) {
       const embded = this.createEmbed({
