@@ -15,10 +15,7 @@ plugins:
       token: ${POT_TOKEN}
       visitorData: ${VISITOR_DATA}
     clients:
-      - MUSIC
-      - TVHTML5EMBEDDED
-      - WEB
-      - WEBEMBEDDED
+      - ANDROID_VR
 lavalink:
   plugins:
     # Replace VERSION with the current version as shown by the Releases tab or a long commit hash for snapshots.
