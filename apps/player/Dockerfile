@@ -1,4 +1,4 @@
-FROM ghcr.io/lavalink-devs/lavalink:4.0.8
+FROM ghcr.io/lavalink-devs/lavalink:4.2.1
 
 # Install gettext-base for envsubst
 USER root
