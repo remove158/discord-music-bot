@@ -7,7 +7,7 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 # disable native crypto (fix ARM libdave issue)
-ENV JAVA_TOOL_OPTIONS="-Dlava.native=false -XX:+UseG1GC -XX:MaxRAMPercentage=75"
+ENV JAVA_TOOL_OPTIONS="-Dlava.native=false -Dlavalink.udpqueue.native=false -XX:+UseG1GC -XX:MaxRAMPercentage=75"
 
 USER lavalink
 
