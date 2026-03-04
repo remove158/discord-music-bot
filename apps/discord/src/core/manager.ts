@@ -85,9 +85,9 @@ export class LavaPlayerManager {
         description: [
           `> - **Author:** ${track?.info?.author}`,
           `> - **Duration:** ${formatMS_HHMMSS(
-            track?.info?.duration || 0
+            track?.info?.duration || 0,
           )} | Ends <t:${Math.floor(
-            (Date.now() + (track?.info?.duration || 0)) / 1000
+            (Date.now() + (track?.info?.duration || 0)) / 1000,
           )}:R>`,
           `> - **Source:** ${track?.info?.sourceName}`,
           `> - **Requester:** <@${(track?.requester as CustomRequester)?.id}>`,
@@ -97,10 +97,12 @@ export class LavaPlayerManager {
         ],
       });
 
-      embed.setThumbnail(track.info.artworkUrl);
+      if (track) {
+        embed.setThumbnail(track.info.artworkUrl);
+      }
 
       const channel = this._client.channels.cache.get(
-        player.textChannelId!
+        player.textChannelId!,
       ) as TextChannel;
       if (!channel) return;
 
@@ -108,7 +110,7 @@ export class LavaPlayerManager {
         new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
           pauseButton,
           skipButton,
-          destoryButton
+          destoryButton,
         );
 
       const message = await channel.send({
@@ -122,7 +124,7 @@ export class LavaPlayerManager {
 
     this._lavalink.on("trackEnd", async (player, track) => {
       const message = LavaPlayerManager.getLatestControllerMessage(
-        player.guildId
+        player.guildId,
       );
       if (message && message.editable)
         message.edit({
@@ -132,7 +134,7 @@ export class LavaPlayerManager {
 
     this._lavalink.on("trackError", async (player, track, err) => {
       const channel = this._client.channels.cache.get(
-        player.textChannelId!
+        player.textChannelId!,
       ) as TextChannel;
       LavaPlayerManager.setAutoplay(player.guildId!, false);
       const ownerEmb = MessageHelper.createEmbed({
@@ -155,14 +157,14 @@ export class LavaPlayerManager {
         title:
           `❌  เกิดข้อผิดพลาดในการเล่นเพลง ${track?.info?.title}`.substring(
             0,
-            256
+            256,
           ),
         description: [
           `> - **Author:** ${track?.info?.author}`,
           `> - **Duration:** ${formatMS_HHMMSS(
-            track?.info?.duration || 0
+            track?.info?.duration || 0,
           )} | Ends <t:${Math.floor(
-            (Date.now() + (track?.info?.duration || 0)) / 1000
+            (Date.now() + (track?.info?.duration || 0)) / 1000,
           )}:R>`,
           `> - **Source:** ${track?.info?.sourceName}`,
           `> - **Requester:** <@${(track?.requester as CustomRequester)?.id}>`,
@@ -180,7 +182,7 @@ export class LavaPlayerManager {
       });
 
       const message = LavaPlayerManager.getLatestControllerMessage(
-        player.guildId
+        player.guildId,
       );
 
       if (message && message.editable)
@@ -191,7 +193,7 @@ export class LavaPlayerManager {
 
     this._lavalink.on("queueEnd", async (player, track) => {
       const message = LavaPlayerManager.getLatestControllerMessage(
-        player.guildId
+        player.guildId,
       );
       if (message && message.editable)
         message.edit({
@@ -240,7 +242,7 @@ export class LavaPlayerManager {
 
   static setAutocompleteCache(
     interaction: AutocompleteInteraction<CacheType>,
-    searchResult: SearchResult
+    searchResult: SearchResult,
   ) {
     const timeoutKey = this.createTimeoutKey(interaction);
     const responseKey = this.createResponseKey(interaction);
@@ -253,7 +255,7 @@ export class LavaPlayerManager {
       setTimeout(() => {
         this.autocomplete.delete(responseKey);
         this.autocomplteTimeout.delete(timeoutKey);
-      }, 25_000)
+      }, 25_000),
     );
   }
   static createTimeoutKey(interaction: Interaction<CacheType>) {
@@ -266,7 +268,7 @@ export class LavaPlayerManager {
 
   static getAutoCompleteSearchResult(
     interaction: Interaction<CacheType>,
-    message: string
+    message: string,
   ) {
     const timeoutKey = this.createTimeoutKey(interaction);
     const responseKey = this.createResponseKey(interaction);

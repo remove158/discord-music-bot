@@ -1,22 +1,15 @@
 import {
-  ActionRowBuilder,
   ApplicationCommandOptionType,
-  ButtonBuilder,
-  ButtonInteraction,
-  ButtonStyle,
   type CacheType,
   type Interaction,
-  type MessageActionRowComponentBuilder,
 } from "discord.js";
-import { ButtonComponent, Discord, Slash, SlashOption } from "discordx";
+import { Discord, Slash, SlashOption } from "discordx";
 import {
-  Player,
   type SearchResult,
   type Track,
   type UnresolvedTrack,
 } from "lavalink-client";
 import { LavaPlayerManager } from "../core/manager";
-import { formatMS_HHMMSS } from "../utils/format";
 import { MessageHelper } from "../utils/message-embed";
 
 @Discord()
@@ -27,20 +20,26 @@ class Play {
       description: "What to play?",
       name: "query",
       required: true,
+      minLength: 1,
       type: ApplicationCommandOptionType.String,
       autocomplete: true,
     })
     message: string,
-    interaction: Interaction<CacheType>
+    interaction: Interaction<CacheType>,
   ): Promise<any> {
     try {
       const player = await LavaPlayerManager.getConnectedPlayer(interaction);
       if (interaction.isAutocomplete()) {
+        if (!message) {
+          return await interaction.respond([
+            { name: `No Tracks found`, value: "nothing_found" },
+          ]);
+        }
         const searchResult = (await player.search(
           {
             query: message,
           },
-          interaction.user
+          interaction.user,
         )) as SearchResult;
         if (!searchResult.tracks.length)
           return await interaction.respond([
@@ -59,7 +58,7 @@ class Play {
             {
               query: message,
             },
-            interaction.user
+            interaction.user,
           )) as SearchResult);
 
         if (!searchResult || !searchResult.tracks?.length) {
@@ -76,7 +75,7 @@ class Play {
               : 0
           ];
         await player.queue.add(
-          searchResult.loadType === "playlist" ? searchResult.tracks : track
+          searchResult.loadType === "playlist" ? searchResult.tracks : track,
         );
 
         if (!player.playing) await player.play({ volume: 100, paused: false });
@@ -87,9 +86,9 @@ class Play {
             description: MessageHelper.createAddedResult(
               searchResult,
               player,
-              track
+              track,
             ),
-          })
+          }),
         );
       }
     } catch (err) {
