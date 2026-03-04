@@ -1,7 +1,20 @@
 #!/bin/sh
+set -e
 
-# Replace environment variables in the template
-envsubst < application.yml.template > /opt/Lavalink/application.yml
+TEMPLATE="/opt/Lavalink/application.yml.template"
+CONFIG="/opt/Lavalink/application.yml"
 
-# Start Lavalink
-exec java -Djdk.tls.client.protocols=TLSv1.2 -jar Lavalink.jar
+# ensure template exists
+if [ ! -f "$TEMPLATE" ]; then
+  echo "application.yml.template not found!"
+  exit 1
+fi
+
+# render config
+envsubst < "$TEMPLATE" > "$CONFIG"
+
+echo "Generated Lavalink config:"
+cat "$CONFIG"
+
+# start Lavalink
+exec java $JAVA_TOOL_OPTIONS -Djdk.tls.client.protocols=TLSv1.2 -jar /opt/Lavalink/Lavalink.jar
